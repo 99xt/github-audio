@@ -12,7 +12,11 @@ var scale_factor = 6,
     note_overlap = 2,
     note_timeout = 300,
     current_notes = 0,
-    max_life = 2000000;
+    max_life = {
+      circle: 120000, // Two minutes
+      circle_container: 30000, // Half a minute
+      circle_text: 60000 // One minutes
+    };
 
 var svg_background_color_online = '#0288D1',
     svg_background_color_offline = '#E91E63'
@@ -30,25 +34,24 @@ var svg_background_color_online = '#0288D1',
         swells = [],
         all_loaded = false;
 
-var temp = [];
 
-var socket = io('172.20.9.173:8000');
+
+var socket = io(document.location.hostname);
 socket.on('github', function (data) {
   $('.online-users-count').html(data.connected_users);
   data.data.forEach(function(event){
-    //console.log(event);
-    // if(!isEventInQueue(event)){
+    if(!isEventInQueue(event)){
       // Filter out events only specified by the user
-      // if(orgRepoFilterNames != []){
+      if(orgRepoFilterNames != []){
         // Don't consider pushes to github.io repos when org filter is on
-        // if(new RegExp(orgRepoFilterNames.join("|")).test(event.repo_name)
-        //    && event.repo_name.indexOf('github.io') == -1){
-              eventQueue.push(event);
-        // }
-      // }else{
-      //   //eventQueue.push(event);
-      // }
-    // }
+        if(new RegExp(orgRepoFilterNames.join("|")).test(event.repo_name)
+           && event.repo_name.indexOf('github.io') == -1){
+          eventQueue.push(event);
+        }
+      }else{
+        eventQueue.push(event);
+      }
+    }
   });
   // Don't let the eventQueue grow more than 1000
   if (eventQueue.length > 1000) eventQueue = eventQueue.slice(0, 1000);
@@ -290,23 +293,23 @@ function drawEvent(data, svg_area) {
     svg_text_color = '#FFFFFF';
     switch(data.type){
       case "PushEvent":
-        label_text = 'Push';
+        label_text = data.user.capitalize() + " pushed to " + data.repo_name;
         edit_color = '#B2DFDB';
       break;
       case "PullRequestEvent":
-        label_text = 'PullRequestEvent';
+        label_text = data.user.capitalize() + " " +
           data.action + " " + " a PR for " + data.repo_name;
           edit_color = '#C6FF00';
           ring_anim_duration = 10000;
           ring_radius = 600;
       break;
       case "IssuesEvent":
-        label_text = 'IssuesEvent';
+        label_text = data.user.capitalize() + " " +
           data.action + " an issue in " + data.repo_name;
           edit_color = '#FFEB3B';
       break;
       case "IssueCommentEvent":
-        label_text = 'IssueCommentEvent';
+        label_text = data.user.capitalize() + " commented in " + data.repo_name;
         edit_color = '#FF5722';
       break;
     }
@@ -317,7 +320,7 @@ function drawEvent(data, svg_area) {
     var circle_id = 'd' + ((Math.random() * 100000) | 0);
     var abs_size = Math.abs(size);
     size = Math.max(Math.sqrt(abs_size) * scale_factor, 3);
-    
+
     Math.seedrandom(data.message)
     var x = Math.random() * (width - size) + size;
     var y = Math.random() * (height - size) + size;
@@ -348,7 +351,7 @@ function drawEvent(data, svg_area) {
     circle.attr('r', size)
       .attr('fill', edit_color)
       .transition()
-      .duration(max_life)
+      .duration(max_life.circle)
       .style('opacity', 0)
       .remove();
 
@@ -362,7 +365,7 @@ function drawEvent(data, svg_area) {
           .transition()
           .delay(1000)
           .style('opacity', 0)
-          .duration(200000)
+          .duration(max_life.circle_container)
           .each(function() { no_label = true; })
           .remove();
     });
@@ -375,103 +378,7 @@ function drawEvent(data, svg_area) {
         .transition()
         .delay(2000)
         .style('opacity', 0)
-        .duration(500000)
-        .each(function() { no_label = true; })
-        .remove();
-
-  // Remove HTML of decayed events
-  // Keep it less than 50
-  if($('#area svg g').length > 50){
-    $('#area svg g:lt(10)').remove();
-  }
-}
-
-
-socket.on('tweet', function (data) {
-  console.log(data);
-  drawEventTwitter(data.tweet.text, svg);
-});
-
-
-function drawEventTwitter(data, svg_area) {
-    var starting_opacity = 1;
-    var opacity = 1 / (100 / data.length);
-    if (opacity > 0.5) {
-        opacity = 0.5;
-    }
-    var size = data.length;
-    var label_text;
-    var ring_radius = 80;
-    var ring_anim_duration = 3000;
-    svg_text_color = '#FFFFFF';
-    label_text = data;
-    edit_color = '#B2DFDB';
-    var csize = size;
-    var no_label = false;
-    var type = data.type;
-
-    var circle_id = 'd' + ((Math.random() * 100000) | 0);
-    var abs_size = Math.abs(size);
-    size = Math.max(Math.sqrt(abs_size) * scale_factor, 3);
-
-    Math.seedrandom(data)
-    var x = Math.random() * (width - size) + size;
-    var y = Math.random() * (height - size) + size;
-
-
-    var circle_group = svg_area.append('g')
-        .attr('transform', 'translate(' + x + ', ' + y + ')')
-        .attr('fill', edit_color)
-        .style('opacity', starting_opacity)
-
-
-    var ring = circle_group.append('circle');
-    ring.attr({r: size, stroke: 'none'});
-    ring.transition()
-        .attr('r', size + ring_radius)
-        .style('opacity', 0)
-        .ease(Math.sqrt)
-        .duration(ring_anim_duration)
-        .remove();
-
-    var circle_container = circle_group.append('a');
-    circle_container.attr('xlink:href', 'https://github.com/' + data);
-    circle_container.attr('target', '_blank');
-    circle_container.attr('fill', svg_text_color);
-
-    var circle = circle_container.append('circle');
-    circle.classed(type, true);
-    circle.attr('r', size)
-      .attr('fill', edit_color)
-      .transition()
-      .duration(max_life)
-      .style('opacity', 0)
-      .remove();
-
-
-    circle_container.on('mouseover', function() {
-      circle_container.append('text')
-          .text(label_text)
-          .classed('label', true)
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '0.8em')
-          .transition()
-          .delay(1000)
-          .style('opacity', 0)
-          .duration(2000)
-          .each(function() { no_label = true; })
-          .remove();
-    });
-
-    var text = circle_container.append('text')
-        .text(label_text)
-        .classed('article-label', true)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '0.8em')
-        .transition()
-        .delay(2000)
-        .style('opacity', 0)
-        .duration(5000)
+        .duration(max_life.circle_text)
         .each(function() { no_label = true; })
         .remove();
 
