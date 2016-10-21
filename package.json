@@ -7,7 +7,7 @@
     "test": "test",
     "start": "node server/index.js"
   },
-  "engines" : { "node" : ">=0.10.3 <6.9" },
+  "engines" : { "node" : "6.9" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/debugger22/github-audio.git"
