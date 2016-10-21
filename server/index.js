@@ -79,7 +79,7 @@ io.on('connection', function (socket) {
 
 //twitter
 function fetchDataFromTwitter() {
-  client.stream('statuses/filter',{track:'#99XTHackathon'},function(stream){
+  client.stream('statuses/filter', { track:'#99XTHackathon' },function(stream){
     stream.on('data', function(tweet) {
       console.log('tweeetsssss', tweet);
       io.emit('tweet', { tweet: tweet });

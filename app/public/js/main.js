@@ -90,7 +90,6 @@ socket.on('error', function(){
 * This function checks whether an event is already in the queue
 */
 function isEventInQueue(event){
-  console.log(event);
   for(var i=0; i<eventQueue.length; i++){
     if(eventQueue[i].id == event.id)
       return true;
@@ -245,7 +244,6 @@ function playSound(size, type) {
 // consuming n events each per second with a random delay between them
 
 function playFromQueueExchange1(){
-  console.log('length ', eventQueue.length);
   var event = eventQueue.shift();
   if(event != null && event.message != null && !shouldEventBeIgnored(event) && svg != null){
     playSound(event.message.length*1.1, event.type);
@@ -292,23 +290,23 @@ function drawEvent(data, svg_area) {
     svg_text_color = '#FFFFFF';
     switch(data.type){
       case "PushEvent":
-        label_text = data.user.capitalize() + " pushed to " + data.repo_name;
+        label_text = 'Push';
         edit_color = '#B2DFDB';
       break;
       case "PullRequestEvent":
-        label_text = data.user.capitalize() + " " +
+        label_text = 'PullRequestEvent';
           data.action + " " + " a PR for " + data.repo_name;
           edit_color = '#C6FF00';
           ring_anim_duration = 10000;
           ring_radius = 600;
       break;
       case "IssuesEvent":
-        label_text = data.user.capitalize() + " " +
+        label_text = 'IssuesEvent';
           data.action + " an issue in " + data.repo_name;
           edit_color = '#FFEB3B';
       break;
       case "IssueCommentEvent":
-        label_text = data.user.capitalize() + " commented in " + data.repo_name;
+        label_text = 'IssueCommentEvent';
         edit_color = '#FF5722';
       break;
     }
@@ -319,7 +317,7 @@ function drawEvent(data, svg_area) {
     var circle_id = 'd' + ((Math.random() * 100000) | 0);
     var abs_size = Math.abs(size);
     size = Math.max(Math.sqrt(abs_size) * scale_factor, 3);
-
+    
     Math.seedrandom(data.message)
     var x = Math.random() * (width - size) + size;
     var y = Math.random() * (height - size) + size;
@@ -390,6 +388,7 @@ function drawEvent(data, svg_area) {
 
 
 socket.on('tweet', function (data) {
+  console.log(data);
   drawEventTwitter(data.tweet.text, svg);
 });
 
