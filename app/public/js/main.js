@@ -39,15 +39,15 @@ socket.on('github', function (data) {
     //console.log(event);
     // if(!isEventInQueue(event)){
       // Filter out events only specified by the user
-      // if(orgRepoFilterNames != []){
+      if(orgRepoFilterNames != []){
         // Don't consider pushes to github.io repos when org filter is on
-        // if(new RegExp(orgRepoFilterNames.join("|")).test(event.repo_name)
-        //    && event.repo_name.indexOf('github.io') == -1){
+        if(new RegExp(orgRepoFilterNames.join("|")).test(event.repo_name)
+           && event.repo_name.indexOf('github.io') == -1){
               eventQueue.push(event);
-        // }
-      // }else{
-      //   //eventQueue.push(event);
-      // }
+        }
+      }else{
+        eventQueue.push(event);
+      }
     // }
   });
   // Don't let the eventQueue grow more than 1000
@@ -290,23 +290,23 @@ function drawEvent(data, svg_area) {
     svg_text_color = '#FFFFFF';
     switch(data.type){
       case "PushEvent":
-        label_text = 'Push';
+        label_text = 'Push : ' + data.repo_name;
         edit_color = '#B2DFDB';
       break;
       case "PullRequestEvent":
-        label_text = 'PullRequestEvent';
+        label_text = 'PullRequest : ' + data.repo_name;
           data.action + " " + " a PR for " + data.repo_name;
           edit_color = '#C6FF00';
           ring_anim_duration = 10000;
           ring_radius = 600;
       break;
       case "IssuesEvent":
-        label_text = 'IssuesEvent';
+        label_text = 'Issues : ' + data.repo_name;
           data.action + " an issue in " + data.repo_name;
           edit_color = '#FFEB3B';
       break;
       case "IssueCommentEvent":
-        label_text = 'IssueCommentEvent';
+        label_text = 'IssueComment : ' + data.repo_name;
         edit_color = '#FF5722';
       break;
     }
