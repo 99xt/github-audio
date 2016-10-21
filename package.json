@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "start": "cross-env NODE_ENV=development node server"
+    "start": "node server/index.js"
   },
+  "engines" : { "node" : ">=0.10.3 <6.9" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/debugger22/github-audio.git"

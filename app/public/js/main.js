@@ -362,7 +362,7 @@ function drawEvent(data, svg_area) {
           .transition()
           .delay(1000)
           .style('opacity', 0)
-          .duration(200000)
+          .duration(2000)
           .each(function() { no_label = true; })
           .remove();
     });
@@ -375,7 +375,7 @@ function drawEvent(data, svg_area) {
         .transition()
         .delay(2000)
         .style('opacity', 0)
-        .duration(500000)
+        .duration(5000)
         .each(function() { no_label = true; })
         .remove();
 
