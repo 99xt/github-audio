@@ -375,7 +375,7 @@ function drawEvent(data, svg_area) {
         .transition()
         .delay(2000)
         .style('opacity', 0)
-        .duration(5000)
+        .duration(2000000)
         .each(function() { no_label = true; })
         .remove();
 
@@ -471,7 +471,7 @@ function drawEventTwitter(data, svg_area) {
         .transition()
         .delay(2000)
         .style('opacity', 0)
-        .duration(5000)
+        .duration(2000000)
         .each(function() { no_label = true; })
         .remove();
 
