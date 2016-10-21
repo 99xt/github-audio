@@ -12,7 +12,7 @@ var scale_factor = 6,
     note_overlap = 2,
     note_timeout = 300,
     current_notes = 0,
-    max_life = 20000;
+    max_life = 2000000;
 
 var svg_background_color_online = '#0288D1',
     svg_background_color_offline = '#E91E63'
@@ -361,7 +361,7 @@ function drawEvent(data, svg_area) {
           .transition()
           .delay(1000)
           .style('opacity', 0)
-          .duration(2000)
+          .duration(200000)
           .each(function() { no_label = true; })
           .remove();
     });
@@ -374,7 +374,7 @@ function drawEvent(data, svg_area) {
         .transition()
         .delay(2000)
         .style('opacity', 0)
-        .duration(5000)
+        .duration(500000)
         .each(function() { no_label = true; })
         .remove();
 
