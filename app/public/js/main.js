@@ -30,24 +30,25 @@ var svg_background_color_online = '#0288D1',
         swells = [],
         all_loaded = false;
 
+var temp = [];
 
-
-var socket = io(document.location.hostname);
+var socket = io('172.20.9.173:8000');
 socket.on('github', function (data) {
   $('.online-users-count').html(data.connected_users);
   data.data.forEach(function(event){
-    if(!isEventInQueue(event)){
+    //console.log(event);
+    // if(!isEventInQueue(event)){
       // Filter out events only specified by the user
-      if(orgRepoFilterNames != []){
+      // if(orgRepoFilterNames != []){
         // Don't consider pushes to github.io repos when org filter is on
-        if(new RegExp(orgRepoFilterNames.join("|")).test(event.repo_name)
-           && event.repo_name.indexOf('github.io') == -1){
-          eventQueue.push(event);
-        }
-      }else{
-        eventQueue.push(event);
-      }
-    }
+        // if(new RegExp(orgRepoFilterNames.join("|")).test(event.repo_name)
+        //    && event.repo_name.indexOf('github.io') == -1){
+              eventQueue.push(event);
+        // }
+      // }else{
+      //   //eventQueue.push(event);
+      // }
+    // }
   });
   // Don't let the eventQueue grow more than 1000
   if (eventQueue.length > 1000) eventQueue = eventQueue.slice(0, 1000);
@@ -89,6 +90,7 @@ socket.on('error', function(){
 * This function checks whether an event is already in the queue
 */
 function isEventInQueue(event){
+  console.log(event);
   for(var i=0; i<eventQueue.length; i++){
     if(eventQueue[i].id == event.id)
       return true;
@@ -243,6 +245,7 @@ function playSound(size, type) {
 // consuming n events each per second with a random delay between them
 
 function playFromQueueExchange1(){
+  console.log('length ', eventQueue.length);
   var event = eventQueue.shift();
   if(event != null && event.message != null && !shouldEventBeIgnored(event) && svg != null){
     playSound(event.message.length*1.1, event.type);
@@ -339,6 +342,101 @@ function drawEvent(data, svg_area) {
 
     var circle_container = circle_group.append('a');
     circle_container.attr('xlink:href', 'https://github.com/' + data.repo_name);
+    circle_container.attr('target', '_blank');
+    circle_container.attr('fill', svg_text_color);
+
+    var circle = circle_container.append('circle');
+    circle.classed(type, true);
+    circle.attr('r', size)
+      .attr('fill', edit_color)
+      .transition()
+      .duration(max_life)
+      .style('opacity', 0)
+      .remove();
+
+
+    circle_container.on('mouseover', function() {
+      circle_container.append('text')
+          .text(label_text)
+          .classed('label', true)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '0.8em')
+          .transition()
+          .delay(1000)
+          .style('opacity', 0)
+          .duration(2000)
+          .each(function() { no_label = true; })
+          .remove();
+    });
+
+    var text = circle_container.append('text')
+        .text(label_text)
+        .classed('article-label', true)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '0.8em')
+        .transition()
+        .delay(2000)
+        .style('opacity', 0)
+        .duration(5000)
+        .each(function() { no_label = true; })
+        .remove();
+
+  // Remove HTML of decayed events
+  // Keep it less than 50
+  if($('#area svg g').length > 50){
+    $('#area svg g:lt(10)').remove();
+  }
+}
+
+
+socket.on('tweet', function (data) {
+  drawEventTwitter(data.tweet.text, svg);
+});
+
+
+function drawEventTwitter(data, svg_area) {
+    var starting_opacity = 1;
+    var opacity = 1 / (100 / data.length);
+    if (opacity > 0.5) {
+        opacity = 0.5;
+    }
+    var size = data.length;
+    var label_text;
+    var ring_radius = 80;
+    var ring_anim_duration = 3000;
+    svg_text_color = '#FFFFFF';
+    label_text = data;
+    edit_color = '#B2DFDB';
+    var csize = size;
+    var no_label = false;
+    var type = data.type;
+
+    var circle_id = 'd' + ((Math.random() * 100000) | 0);
+    var abs_size = Math.abs(size);
+    size = Math.max(Math.sqrt(abs_size) * scale_factor, 3);
+
+    Math.seedrandom(data)
+    var x = Math.random() * (width - size) + size;
+    var y = Math.random() * (height - size) + size;
+
+
+    var circle_group = svg_area.append('g')
+        .attr('transform', 'translate(' + x + ', ' + y + ')')
+        .attr('fill', edit_color)
+        .style('opacity', starting_opacity)
+
+
+    var ring = circle_group.append('circle');
+    ring.attr({r: size, stroke: 'none'});
+    ring.transition()
+        .attr('r', size + ring_radius)
+        .style('opacity', 0)
+        .ease(Math.sqrt)
+        .duration(ring_anim_duration)
+        .remove();
+
+    var circle_container = circle_group.append('a');
+    circle_container.attr('xlink:href', 'https://github.com/' + data);
     circle_container.attr('target', '_blank');
     circle_container.attr('fill', svg_text_color);
 
