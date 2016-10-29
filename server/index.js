@@ -64,7 +64,6 @@ io.on('connection', function (socket) {
   })
 });
 
-<<<<<<< HEAD
 //twitter
 function fetchDataFromTwitter() {
   client.stream('statuses/filter', { track:'#99XTHackathon' },function(stream){
@@ -82,20 +81,13 @@ fetchDataFromTwitter();
 // setTimeout(fetchDataFromTwitter, 2000);
 //twitter
 
-
-=======
->>>>>>> parent of f249b37... add Tweet feed
 // Function to get events from GitHub API
 function fetchDataFromGithub(){
   var options = {
     url: 'https://api.github.com/events',
     headers: {
       'User-Agent': 'Mozilla/5.0 (Linux; Android 5.1.1; Nexus 5 Build/LMY48B; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/43.0.2357.65 Mobile Safari/537.36',
-<<<<<<< HEAD
       'Authorization': 'token ' + '0388076104bd9d1a0464d29e5c6589895de07386'
-=======
-      'Authorization': 'token ' + process.env.GITHUB_OAUTH_KEY
->>>>>>> parent of f249b37... add Tweet feed
     }
   };
   request(options, function (error, response, body) {
