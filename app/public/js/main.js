@@ -287,6 +287,7 @@ function drawEvent(data, svg_area) {
     var size = data.message.length;
     var label_text;
     var ring_radius = 80;
+    var avatar_url = data.user_avatar;
     var ring_anim_duration = 3000;
     svg_text_color = '#FFFFFF';
     switch(data.type){
@@ -360,6 +361,7 @@ function drawEvent(data, svg_area) {
           .classed('label', true)
           .attr('text-anchor', 'middle')
           .attr('font-size', '0.8em')
+          .attr('y', 12)
           .transition()
           .delay(1000)
           .style('opacity', 0)
@@ -367,12 +369,21 @@ function drawEvent(data, svg_area) {
           .each(function() { no_label = true; })
           .remove();
     });
+    
+    var avatar = circle_container
+        .append("image")
+        .attr("xlink:href", avatar_url)
+        .attr('x', -15)
+        .attr('y', -30)
+        .attr('width', 30)
+        .attr('height', 30);
 
     var text = circle_container.append('text')
         .text(label_text)
         .classed('article-label', true)
         .attr('text-anchor', 'middle')
         .attr('font-size', '0.8em')
+        .attr('y', 12)
         .transition()
         .delay(2000)
         .style('opacity', 0)
