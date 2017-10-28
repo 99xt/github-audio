@@ -2,17 +2,19 @@
 
 var express = require('express');
 var app = express();
-var request = require("request");  // To make HTTP requests at the server side
+var request = require("request"); // To make HTTP requests at the server side
 
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
-var helmet = require('helmet');  // To change response headers
+var helmet = require('helmet'); // To change response headers
 
 // To temporarily store JSON data from GitHub and also
 // the number of connected users
 var redis = require("redis"),
-    redis_client = redis.createClient();
+redis_client = redis.createClient();
+
+var Twitter = require('twitter');
 
 var path = require('path');
 
@@ -20,17 +22,27 @@ const logger = require('./logger');
 const argv = require('minimist')(process.argv.slice(2));
 const isDev = process.env.NODE_ENV !== 'production';
 
+// Set up Twitter client
+
+var client = new Twitter({
+  consumer_key: process.env.TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+});
+
 // Get the intended port number, use port 8000 if not provided
-const port = argv.port || process.env.PORT || 80;
+const port = argv.port || process.env.PORT || 8000;
+
 server.listen(port, (err) => {
-  if(err){
+  if (err) {
     return logger.error(err.message);
   }
 });
-if(isDev)
-  logger.appStarted(port, 'http://localhost');
+if (isDev)
+logger.appStarted(port, 'http://localhost');
 else
-  logger.appStarted(port);
+logger.appStarted(port);
 
 // Apply security middlewares
 app.use(helmet());
@@ -53,10 +65,10 @@ io.on('connection', function (socket) {
   allClients.push(socket);
   redis_client.incr('connected_users');
   socket.on('disconnect', function() {
-     logger.v('Got disconnect!');
-     var i = allClients.indexOf(socket);
-     allClients.splice(i, 1);
-     redis_client.decr('connected_users');
+    logger.v('Got disconnect!');
+    var i = allClients.indexOf(socket);
+    allClients.splice(i, 1);
+    redis_client.decr('connected_users');
   });
   socket.on('error', function(){
     logger.error('Got errored!');
@@ -66,12 +78,16 @@ io.on('connection', function (socket) {
 
 //twitter
 function fetchDataFromTwitter() {
-  client.stream('statuses/filter', { track:'#99XTHackathon' },function(stream){
-    stream.on('data', function(tweet) {
-      console.log('tweeetsssss', tweet);
-      io.emit('tweet', { tweet: tweet });
+  client.stream('statuses/filter', {
+    track: '#99XTHackathon'
+  }, function (stream) {
+    stream.on('data', function (tweet) {
+      // console.log('tweeetsssss', tweet);
+      io.emit('tweet', {
+        tweet: tweet
+      });
     });
-    stream.on('error',function(error) {
+    stream.on('error', function (error) {
       console.log(error);
     });
   });
@@ -82,12 +98,12 @@ fetchDataFromTwitter();
 //twitter
 
 // Function to get events from GitHub API
-function fetchDataFromGithub(){
+function fetchDataFromGithub() {
   var options = {
     url: 'https://api.github.com/events',
     headers: {
       'User-Agent': 'Mozilla/5.0 (Linux; Android 5.1.1; Nexus 5 Build/LMY48B; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/43.0.2357.65 Mobile Safari/537.36',
-      'Authorization': 'token ' + '0388076104bd9d1a0464d29e5c6589895de07386'
+      'Authorization': 'token ' + process.env.GITHUB_OAUTH_KEY 
     }
   };
   request(options, function (error, response, body) {
@@ -110,9 +126,9 @@ function fetchDataFromGithub(){
       logger.error("GitHub status code: " + response.statusCode);
     }
   })
-  setTimeout(fetchDataFromGithub, 2000);
 }
-setTimeout(fetchDataFromGithub, 2000);
+
+setInterval(fetchDataFromGithub, 2000);
 
 
 function stripData(data){

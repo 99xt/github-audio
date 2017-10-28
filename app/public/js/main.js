@@ -31,12 +31,9 @@ var svg_background_color_online = '#0288D1',
         all_loaded = false;
 
 
-<<<<<<< HEAD
-var socket = io('https://calm-meadow-97988.herokuapp.com');
-=======
 
-var socket = io(document.location.hostname);
->>>>>>> parent of f249b37... add Tweet feed
+var socket = io(document.location.origin);
+
 socket.on('github', function (data) {
   $('.online-users-count').html(data.connected_users);
   data.data.forEach(function(event){
@@ -46,21 +43,14 @@ socket.on('github', function (data) {
         // Don't consider pushes to github.io repos when org filter is on
         if(new RegExp(orgRepoFilterNames.join("|")).test(event.repo_name)
            && event.repo_name.indexOf('github.io') == -1){
-<<<<<<< HEAD
-              eventQueue.push(event);
-=======
           eventQueue.push(event);
->>>>>>> parent of f249b37... add Tweet feed
         }
       }else{
         eventQueue.push(event);
       }
-<<<<<<< HEAD
-    // }
-=======
     }
->>>>>>> parent of f249b37... add Tweet feed
   });
+
   // Don't let the eventQueue grow more than 1000
   if (eventQueue.length > 1000) eventQueue = eventQueue.slice(0, 1000);
 });
@@ -396,8 +386,6 @@ function drawEvent(data, svg_area) {
     $('#area svg g:lt(10)').remove();
   }
 }
-<<<<<<< HEAD
-
 
 socket.on('tweet', function (data) {
   console.log(data);
@@ -493,5 +481,3 @@ function drawEventTwitter(data, svg_area) {
     $('#area svg g:lt(10)').remove();
   }
 }
-=======
->>>>>>> parent of f249b37... add Tweet feed
