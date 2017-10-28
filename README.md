@@ -54,6 +54,13 @@ $ export GITHUB_OAUTH_KEY=<your_github_oauth_key>
 
 Note: Without the GitHub oauth key the number of requests is throttled at 60 per hour. It can be increased to 5000 per hour by using an oauth key.
 
+```
+$ export TWITTER_CONSUMER_KEY=<your_twitter_consumer_key>
+$ export TWITTER_CONSUMER_SECRET=<your_twitter_consumer_secret>
+$ export TWITTER_ACCESS_TOKEN_KEY=<your_twitter_access_token_key>
+$ export TWITTER_ACCESS_TOKEN_SECRET=<your_twitter_token_secret>
+```
+
 Run server
 ----------
 
